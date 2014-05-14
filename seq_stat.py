@@ -53,6 +53,10 @@ def main(argv):
 						import textwrap
 						for line in textwrap.wrap(run['Issues'], width=75):
 							print "#  {:<77}#".format(line)
+					if run['QaIssues']:
+						import textwrap
+						for line in textwrap.wrap(run['QaIssues'], width=75):
+							print "#  {:<77}#".format(line)
 					for job in server.query_jobs('qualities', "accession='{RunID}'".format(**run)):
 						print "||+Quality: {file_root} {status}".format(**job)
 						if 'finished' in job['status']:
@@ -139,6 +143,9 @@ try:
 		quit()
 	if '-p' in sys.argv:
 		sys.argv.remove('-p')
+		[sys.argv.append(s.replace("\n", "")) for s in sys.stdin.readlines()]
+	if '-' in sys.argv:
+		sys.argv.remove('-')
 		[sys.argv.append(s.replace("\n", "")) for s in sys.stdin.readlines()]
 	sys.argv[1] #try and provoke IndexError, in case no arguments given
 	main(sys.argv[1:])

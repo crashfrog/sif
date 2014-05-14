@@ -27,6 +27,9 @@ try:
 	if '-p' in sys.argv:
 		sys.argv.remove('-p')
 		[sys.argv.append(s.replace("\n", "")) for s in sys.stdin.readlines()]
+	if '-' in sys.argv:
+		sys.argv.remove('-')
+		[sys.argv.append(s.replace("\n", "")) for s in sys.stdin.readlines()]
 	sys.argv[1]
 	for s in sys.argv[1:]:
 		if s:
