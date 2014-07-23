@@ -5,29 +5,81 @@ import xmlrpclib
 
 server = xmlrpclib.ServerProxy('http://cfe1019692:8080')
 
+class NameableCallable(object):
+
+	def __init__(self, name, func):
+		self.name = name
+		self.func = func
+		
+	def __str__(self):
+		return self.name
+		
+	def __call__(self, *args, **kwargs):
+		return self.func(*args, **kwargs)
+
+
 if __name__ == '__main__':
 	pipe = False
-	fields = ['FdaAccession', 'Genus', 'Species', 'StrainName']
+	fields = ['CFSAN']
 	if '-' in sys.argv:
 		sys.argv.remove('-')
 		pipe = True
 		
 	for arg in sys.argv[1:]:
 		if '--' in arg:
-			fields.append(sys.argv.pop(sys.argv.index(arg)).replace('--', ''))
+			name, exp = sys.argv.pop(sys.argv.index(arg)).replace('--', '').split('=')
+			fields.append(NameableCallable(name, lambda i: exp.format(**i)))
+		elif '-' in arg:
+			fields.append(sys.argv.pop(sys.argv.index(arg)).replace('-', ''))
+			
 		
 	if pipe:
 		ids = [s.replace("\n","") for s in sys.stdin.readlines()]
 	else:
 		ids = sys.argv[1:]
 		
+	ids = list(set(ids))
+	ids.sort()
+		
 	try:
-		print '\t'.join(fields)
+		print '\t'.join([str(f) for f in fields])
 		for id in ids:
 			iso = server.get(id)
-			print '\t'.join([iso[key] for key in fields])
-	except KeyError:
-		print 'Unrecognized database field at isolate level. Acceptable fields are:',
+			iso['CFSAN'] = iso['FdaAccession']
+			try:
+				for key in fields:
+					if iso.get(key, False) == False:
+						print key(iso), '\t',
+					else:
+						print iso.get(key, ''), '\t',
+				#print '\t'.join([iso.get(key, False) or key(iso) for key in fields])
+			except (KeyError, TypeError) as e:
+				try:
+					if '-f' in sys.argv:
+						iso['Runs'] = (iso['Runs'][0], )
+					elif '-l' in sys.argv:
+						iso['Runs'] = (iso['Runs'][-1], )
+
+					for run in iso['Runs']:
+						run = server.get(run['RunID'])
+						run['CFSAN'] = run['RunID']
+						for key in fields:
+							if run.get(key, False) == False:
+								print key(run), '\t',
+							else:
+								print run.get(key, ''), '\t',
+						#print '\t'.join([run.get(key, False) or key(run) for key in fields])
+				except Exception:
+					print type(e), e
+					for key in fields:
+						print key, iso.get(key, type(key))
+					raise
+			print '\n',
+		
+	except KeyError as e:
+		print 'Unrecognized database field "{}". Acceptable fields are:'.format(str(e)),
 		iso = server.get('CFSAN000001')
+		run = iso['Runs'][0]
 		del iso['Runs']
 		print iso.keys()
+		print run.keys()
