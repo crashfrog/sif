@@ -3,19 +3,24 @@
 import sys
 import xmlrpclib
 
+import functools
 server = xmlrpclib.ServerProxy('http://cfe1019692:8080')
 
 class NameableCallable(object):
 
-	def __init__(self, name, func):
+	def __init__(self, name, func, exp):
 		self.name = name
 		self.func = func
+		self.exp = exp
 		
 	def __str__(self):
 		return self.name
 		
-	def __call__(self, *args, **kwargs):
-		return self.func(*args, **kwargs)
+	def __repr__(self):
+		return self.exp
+		
+	def __call__(self, *args):
+		return self.func(*args)
 
 
 if __name__ == '__main__':
@@ -28,7 +33,9 @@ if __name__ == '__main__':
 	for arg in sys.argv[1:]:
 		if '--' in arg:
 			name, exp = sys.argv.pop(sys.argv.index(arg)).replace('--', '').split('=')
-			fields.append(NameableCallable(name, lambda i: exp.format(**i)))
+			callable = NameableCallable(name, lambda i, exp=exp: exp.format(**i), exp)
+			fields.append(callable)
+			
 		elif '-' in arg:
 			fields.append(sys.argv.pop(sys.argv.index(arg)).replace('-', ''))
 			
@@ -49,11 +56,18 @@ if __name__ == '__main__':
 			try:
 				for key in fields:
 					if iso.get(key, False) == False:
+						key(iso)
+					else:
+						iso.get(key, '')
+				for key in fields:
+					if iso.get(key, False) == False:
+						#print repr(key)
 						print key(iso), '\t',
 					else:
 						print iso.get(key, ''), '\t',
 				#print '\t'.join([iso.get(key, False) or key(iso) for key in fields])
 			except (KeyError, TypeError) as e:
+				#print '-=-=-=-=-',
 				try:
 					if '-f' in sys.argv:
 						iso['Runs'] = (iso['Runs'][0], )
@@ -61,6 +75,7 @@ if __name__ == '__main__':
 						iso['Runs'] = (iso['Runs'][-1], )
 
 					for run in iso['Runs']:
+						
 						run = server.get(run['RunID'])
 						run['CFSAN'] = run['RunID']
 						for key in fields:
@@ -69,6 +84,7 @@ if __name__ == '__main__':
 							else:
 								print run.get(key, ''), '\t',
 						#print '\t'.join([run.get(key, False) or key(run) for key in fields])
+						print ''
 				except Exception:
 					print type(e), e
 					for key in fields:
