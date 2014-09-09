@@ -49,6 +49,8 @@ def main(argv):
 			if struct['Runs']:
 				for run in struct['Runs']:
 					print "|+{RunID:<15}{SequenceRunDate:>30}{SequencingTechnology:>33}".format(**run)
+					if run['BasespaceObjectID']:
+						print "||from Basespace with Object ID: {}".format(run['BasespaceObjectID'])
 					if run['Issues']:
 						import textwrap
 						for line in textwrap.wrap(run['Issues'], width=75):
@@ -62,9 +64,9 @@ def main(argv):
 						if 'finished' in job['status']:
 							job['average_read_length'] = job['average_read_length'].replace("\n", '')
 							try:
-								print "|||{average_read_length} bases, avg/read, {num_reads:>7} reads, {size}".format(size = sizeof_fmt(int(job['file_size'])), **job)
+								print "|||{average_read_length} avg bases/read, {num_reads:>7} reads, {size}".format(size = sizeof_fmt(int(job['file_size'])), **job)
 							except:
-								print "|||{average_read_length} bases, avg/read".format(**job)
+								print "|||{average_read_length} avg bases/read".format(**job)
 					if run['AssemblyVersion']:
 						print "||MainAssembly: {AssemblyVersion} {AssemblyFileName}".format(**run)
 					for job in server.query_jobs('assemblies', "accession='{RunID}'".format(**run)):
@@ -115,11 +117,13 @@ def main(argv):
 		else:
 			#struct is a single run
 			print "|+{RunID:<15}{SequenceRunDate:>30}{SequencingTechnology:>33}".format(**struct)
+			if struct['BasespaceObjectID']:
+				print "||from Basespace with Object ID: {}".format(struct['BasespaceObjectID'])
 			for job in server.query_jobs('qualities', "accession='{RunID}'".format(**struct)):
 				print "|+Quality: {file_root} {status}".format(**job)
 				if 'finished' in job['status']:
 					job['average_read_length'] = job['average_read_length'].replace("\n", '')
-					print "||{average_read_length} bases, {num_reads:>7} reads, {size}".format(size = sizeof_fmt(int(job['file_size'])), **job)
+					print "||{average_read_length} avg bases/read, {num_reads:>7} reads, {size}".format(size = sizeof_fmt(int(job['file_size'])), **job)
 			for job in server.query_jobs('assemblies', "accession='{RunID}'".format(**struct)):
 				print "||+Assembly: {assem} {status}:".format(assem = job['assembly_version'] or job['job_type'], **job)
 				if "finished" in job['status'] or "collected" in job['status']:
