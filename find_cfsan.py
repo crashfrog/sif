@@ -16,7 +16,7 @@ Usage:
 	
 	Options:
 	-h	Show this help.
-	-p	Operate in pipe mode - search each line of input on STDIN.
+	-	Operate in pipe mode - search each line of input on STDIN.
 
 """
 

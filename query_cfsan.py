@@ -6,7 +6,25 @@ import itertools
 
 server = xmlrpclib.ServerProxy('http://cfe1019692:8080')
 
-usage = """
+usage = """Version 0.1
+
+Takes search terms as arguments and emits CFSAN RunID's or FdaAccessions that 
+match the query. Useful as a
+
+Usage:
+
+	query_cfsan <field>__<relation> <query_term> [...][-limit <num_results>]
+	
+	(those are double underscores)
+	
+	'contains' and 'containsnot' use pattern-matching on fields
+	'is' and 'isnot' take 'null' as a query term to include or exclude database
+		nulls.
+	
+	Examples:
+		
+		query_cfsan Project__contains GenomeTrakr Genus__isnot Salmonella
+		query_cfsan Serovar__containsnot Typhi Sequenced__is null
 
 """
 

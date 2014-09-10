@@ -4,6 +4,24 @@ import sys
 import xmlrpclib
 
 import functools
+
+usage = """Version 0.2
+
+	metadata <cfsan number>[...] -<field_name>[...] [--Alias={<field_name}]
+
+	Quick and dirty table tool. Takes as input a list of CFSAN numbers, options
+	are CFSAN database field names (single dash) or 'rename' expressions
+	
+	Examples:
+		metadata CFSAN001992 CFSAN001993 -Genus -Species -RunCell
+		metadata CFSAN001992 --Organism="{Genus} {Species} subsp. {Subspecies}\
+			serovar {Serovar} str. {StrainName}" -Isolate
+		cat "CFSAN001992" | metadata - -Project
+
+
+"""
+
+
 server = xmlrpclib.ServerProxy('http://cfe1019692:8080')
 
 class NameableCallable(object):
@@ -93,9 +111,11 @@ if __name__ == '__main__':
 			print '\n',
 		
 	except KeyError as e:
+		import pprint
+		print usage
 		print 'Unrecognized database field "{}". Acceptable fields are:'.format(str(e)),
 		iso = server.get('CFSAN000001')
 		run = iso['Runs'][0]
 		del iso['Runs']
-		print iso.keys()
-		print run.keys()
+		pprint.pprint(iso.keys())
+		pprint.pprint(run.keys())
