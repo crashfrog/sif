@@ -44,6 +44,10 @@ class NameableCallable(object):
 if __name__ == '__main__':
 	pipe = False
 	fields = ['CFSAN']
+	if '-x' in sys.argv:
+		sys.argv.remove('-x')
+		fields = list()
+	
 	if '-' in sys.argv:
 		sys.argv.remove('-')
 		pipe = True

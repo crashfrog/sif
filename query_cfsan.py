@@ -6,7 +6,7 @@ import itertools
 
 server = xmlrpclib.ServerProxy('http://cfe1019692:8080')
 
-usage = """Version 0.1
+usage = """Version 0.2
 
 Takes search terms as arguments and emits CFSAN RunID's or FdaAccessions that 
 match the query. Useful as a
@@ -25,6 +25,11 @@ Usage:
 		
 		query_cfsan Project__contains GenomeTrakr Genus__isnot Salmonella
 		query_cfsan Serovar__containsnot Typhi Sequenced__is null
+		
+Version History:
+
+0.1:	Initial commit.
+0.2:	Added >, <, <=, >= operators.
 
 """
 
@@ -71,6 +76,21 @@ if __name__ == '__main__':
 				else:
 					field = term.split('=')[0]
 					terms.append("([{}] = '{}')".format(field, pattern))
+					
+			elif '>=' in term:
+					field = term.split('>=')[0]
+					terms.append("([{}] >= '{}')".format(field, pattern))
+			elif '<=' in term:
+					field = term.split('<=')[0]
+					terms.append("([{}] <= '{}')".format(field, pattern))
+					
+			elif '>' in term:
+					field = term.split('>')[0]
+					terms.append("([{}] > '{}')".format(field, pattern))
+			elif '<' in term:
+					field = term.split('<')[0]
+					terms.append("([{}] < '{}')".format(field, pattern))
+			
 		keys = server.query_cfsan(' AND '.join(terms) + ' ORDER BY [FdaAccession]')[0:limit]
 		for key in keys:
 			run = server.get(key)
