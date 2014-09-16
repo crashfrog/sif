@@ -25,6 +25,7 @@ Usage:
 		
 		query_cfsan Project__contains GenomeTrakr Genus__isnot Salmonella
 		query_cfsan Serovar__containsnot Typhi Sequenced__is null
+		query_cfsan SequenceRunDate__greaterthaneq 2014-01-01 SequenceRunDate__lessthan 2015-01-01 #(>=, <)
 		
 Version History:
 
@@ -77,18 +78,18 @@ if __name__ == '__main__':
 					field = term.split('=')[0]
 					terms.append("([{}] = '{}')".format(field, pattern))
 					
-			elif '>=' in term:
-					field = term.split('>=')[0]
+			elif '__greaterthaneq' in term:
+					field = term.split('__')[0]
 					terms.append("([{}] >= '{}')".format(field, pattern))
-			elif '<=' in term:
-					field = term.split('<=')[0]
+			elif '__lessthaneq' in term:
+					field = term.split('__')[0]
 					terms.append("([{}] <= '{}')".format(field, pattern))
 					
-			elif '>' in term:
-					field = term.split('>')[0]
+			elif '__greaterthan' in term:
+					field = term.split('__')[0]
 					terms.append("([{}] > '{}')".format(field, pattern))
-			elif '<' in term:
-					field = term.split('<')[0]
+			elif '__lessthan' in term:
+					field = term.split('__')[0]
 					terms.append("([{}] < '{}')".format(field, pattern))
 			
 		keys = server.query_cfsan(' AND '.join(terms) + ' ORDER BY [FdaAccession]')[0:limit]
