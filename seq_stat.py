@@ -48,7 +48,7 @@ def main(argv):
 			#print some pretty text!
 			if struct['Runs']:
 				for run in struct['Runs']:
-					print "|+{RunID:<15}{SequenceRunDate:>30}{SequencingTechnology:>33}".format(**run)
+					print "|+{RunID:<15}{SequenceRunDate:>30}{SeqID:>33}".format(SeqID='{SequencingTechnology} {SequenceMachineID}'.format(**run), **run)
 					if run['BasespaceObjectID']:
 						print "||from Basespace with Object ID: {}".format(run['BasespaceObjectID'])
 					if run['Issues']:
@@ -116,7 +116,7 @@ def main(argv):
 				
 		else:
 			#struct is a single run
-			print "|+{RunID:<15}{SequenceRunDate:>30}{SequencingTechnology:>33}".format(**struct)
+			print "|+{RunID:<15}{SequenceRunDate:>30}{SeqID:>33}".format(SeqID='{SequencingTechnology} {SequenceMachineID}'.format(**struct), **struct)
 			if struct['BasespaceObjectID']:
 				print "||from Basespace with Object ID: {}".format(struct['BasespaceObjectID'])
 			for job in server.query_jobs('qualities', "accession='{RunID}'".format(**struct)):
