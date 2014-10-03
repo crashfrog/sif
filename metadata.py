@@ -47,6 +47,8 @@ if __name__ == '__main__':
 	if '-x' in sys.argv:
 		sys.argv.remove('-x')
 		fields = list()
+		
+	
 	
 	if '-' in sys.argv:
 		sys.argv.remove('-')
@@ -71,6 +73,8 @@ if __name__ == '__main__':
 	ids.sort()
 		
 	try:
+		if '-h' in sys.argv:
+			raise KeyError()
 		print '\t'.join([str(f) for f in fields])
 		for id in ids:
 			iso = server.get(id)
@@ -114,7 +118,7 @@ if __name__ == '__main__':
 					raise
 			print '\n',
 		
-	except KeyError as e:
+	except (KeyError, TypeError) as e:
 		import pprint
 		print usage
 		print 'Unrecognized database field "{}". Acceptable fields are:'.format(str(e)),
