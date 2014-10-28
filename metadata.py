@@ -15,7 +15,7 @@ usage = """Version 0.2
 	Examples:
 		metadata CFSAN001992 CFSAN001993 -Genus -Species -RunCell
 		metadata CFSAN001992 --Organism="{Genus} {Species} subsp. {Subspecies}\
-			serovar {Serovar} str. {StrainName}" -Isolate
+ serovar {Serovar} str. {StrainName}" -Isolate
 		cat "CFSAN001992" | metadata - -Project
 
 
@@ -42,6 +42,9 @@ class NameableCallable(object):
 
 
 if __name__ == '__main__':
+	if '-h' in sys.argv:
+		print usage
+		quit()
 	pipe = False
 	fields = ['CFSAN']
 	if '-x' in sys.argv:
@@ -73,8 +76,6 @@ if __name__ == '__main__':
 	ids.sort()
 		
 	try:
-		if '-h' in sys.argv:
-			raise KeyError()
 		print '\t'.join([str(f) for f in fields])
 		for id in ids:
 			iso = server.get(id)
@@ -101,7 +102,6 @@ if __name__ == '__main__':
 						iso['Runs'] = (iso['Runs'][-1], )
 
 					for run in iso['Runs']:
-						
 						run = server.get(run['RunID'])
 						run['CFSAN'] = run['RunID']
 						for key in fields:
