@@ -94,8 +94,7 @@ if __name__ == '__main__':
 			
 		keys = server.query_cfsan(' AND '.join(terms) + ' ORDER BY [FdaAccession]')[0:limit]
 		for key in keys:
-			run = server.get(key)
-			print run.get('RunID', run['FdaAccession']) or run['FdaAccession']
+			print key
 			
 			
 	except (IndexError):

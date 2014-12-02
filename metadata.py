@@ -46,11 +46,20 @@ if __name__ == '__main__':
 		print usage
 		quit()
 	pipe = False
+	header = True
 	fields = ['CFSAN']
+	runs = 'all'
 	if '-x' in sys.argv:
 		sys.argv.remove('-x')
+		header = False
 		fields = list()
-		
+	
+	if '-f' in sys.argv:
+		sys.argv.remove('-f')
+		runs = 'first'
+	if '-l' in sys.argv:
+		sys.argv.remove('-l')
+		runs = 'last'
 	
 	
 	if '-' in sys.argv:
@@ -76,7 +85,8 @@ if __name__ == '__main__':
 	ids.sort()
 		
 	try:
-		print '\t'.join([str(f) for f in fields])
+		if header:
+			print '\t'.join([str(f) for f in fields])
 		for id in ids:
 			iso = server.get(id)
 			iso['CFSAN'] = iso['FdaAccession']
@@ -93,13 +103,15 @@ if __name__ == '__main__':
 					else:
 						print iso.get(key, ''), '\t',
 				#print '\t'.join([iso.get(key, False) or key(iso) for key in fields])
+				print '\n',
 			except (KeyError, TypeError) as e:
 				#print '-=-=-=-=-',
 				try:
-					if '-f' in sys.argv:
-						iso['Runs'] = (iso['Runs'][0], )
-					elif '-l' in sys.argv:
-						iso['Runs'] = (iso['Runs'][-1], )
+					if iso['Runs']:
+						if 'first' in runs:
+							iso['Runs'] = (iso['Runs'][0], )
+						elif 'last' in runs:
+							iso['Runs'] = (iso['Runs'][-1], )
 
 					for run in iso['Runs']:
 						run = server.get(run['RunID'])
@@ -116,7 +128,7 @@ if __name__ == '__main__':
 					for key in fields:
 						print key, iso.get(key, type(key))
 					raise
-			print '\n',
+			#print '\n',
 		
 	except (KeyError, TypeError) as e:
 		import pprint
