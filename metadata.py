@@ -81,8 +81,8 @@ if __name__ == '__main__':
 	else:
 		ids = sys.argv[1:]
 		
-	ids = list(set(ids))
-	ids.sort()
+	#ids = list(set(ids))
+	#ids.sort()
 		
 	try:
 		if header:
