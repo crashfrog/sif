@@ -41,6 +41,13 @@ class NameableCallable(object):
 		return self.func(*args)
 
 
+def retrieve(struct, key):
+	if struct.get(key, False) == False:
+		return key(struct)
+	else:
+		return struct.get(key, '')
+
+
 if __name__ == '__main__':
 	if '-h' in sys.argv:
 		print usage
@@ -91,19 +98,8 @@ if __name__ == '__main__':
 			iso = server.get(id)
 			iso['CFSAN'] = iso['FdaAccession']
 			try:
-				for key in fields:
-					if iso.get(key, False) == False:
-						key(iso)
-					else:
-						iso.get(key, '')
-				for key in fields:
-					if iso.get(key, False) == False:
-						#print repr(key)
-						print key(iso), '\t',
-					else:
-						print iso.get(key, ''), '\t',
-				#print '\t'.join([iso.get(key, False) or key(iso) for key in fields])
-				print '\n',
+				l = [retrieve(iso, key) for key in fields]
+				print '\t'.join(l)
 			except (KeyError, TypeError) as e:
 				#print '-=-=-=-=-',
 				try:
@@ -116,13 +112,8 @@ if __name__ == '__main__':
 					for run in iso['Runs']:
 						run = server.get(run['RunID'])
 						run['CFSAN'] = run['RunID']
-						for key in fields:
-							if run.get(key, False) == False:
-								print key(run), '\t',
-							else:
-								print run.get(key, ''), '\t',
-						#print '\t'.join([run.get(key, False) or key(run) for key in fields])
-						print ''
+						l = [retrieve(run, key) for key in fields]
+						print '\t'.join(l)
 				except Exception:
 					print type(e), e
 					for key in fields:

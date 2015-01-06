@@ -92,7 +92,7 @@ if __name__ == '__main__':
 					field = term.split('__')[0]
 					terms.append("([{}] < '{}')".format(field, pattern))
 			
-		keys = server.query_cfsan(' AND '.join(terms) + ' ORDER BY [FdaAccession]')[0:limit]
+		keys = server.query_cfsan(' AND '.join(terms) + ' ORDER BY [FdaAccession]')
 		for key in keys:
 			print key
 			
