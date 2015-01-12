@@ -4,6 +4,7 @@ import sys
 import xmlrpclib
 
 import functools
+from collections import defaultdict
 
 usage = """Version 0.2
 
@@ -43,7 +44,10 @@ class NameableCallable(object):
 
 def retrieve(struct, key):
 	if struct.get(key, False) == False:
-		return key(struct)
+		try:
+			return key(struct)
+		except TypeError:
+			return struct[key]
 	else:
 		return struct.get(key, '')
 
@@ -108,9 +112,16 @@ if __name__ == '__main__':
 							iso['Runs'] = (iso['Runs'][0], )
 						elif 'last' in runs:
 							iso['Runs'] = (iso['Runs'][-1], )
+					else:
+						
+						d = defaultdict(lambda: "N/A")
+						d['RunID'] = iso['FdaAccession']
+						#d.update(iso)
+						iso['Runs'] = (d, )
+
 
 					for run in iso['Runs']:
-						run = server.get(run['RunID'])
+						run.update(iso)
 						run['CFSAN'] = run['RunID']
 						l = [retrieve(run, key) for key in fields]
 						print '\t'.join(l)
@@ -130,3 +141,4 @@ if __name__ == '__main__':
 		del iso['Runs']
 		pprint.pprint(iso.keys())
 		pprint.pprint(run.keys())
+		raise
