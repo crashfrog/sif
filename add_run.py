@@ -1,15 +1,17 @@
 #!/usr/bin/env python
 
 import xmlrpclib
+import platform
 import shutil
 import sys
 import os, os.path
 import glob
+from copy import copy
 from os.path import join as j
 
 server = xmlrpclib.ServerProxy('http://cfe1019692:8080')
 
-session_key = server.open_deferred_accept('', {}, False)
+
 
 usage = """
 add_run 0.1
@@ -25,7 +27,12 @@ options:
 	
 """
 
-flags = ('-t', 'type')
+flags = (('-t', 'type'), 
+		#('', ''), 
+		 )
+		 
+type = 'miseq'
+		 
 post_load_updates = {}
 
 run_types = {'pacbio':'PacBio RS sequence',
@@ -46,13 +53,13 @@ else: #Windows
 	
 if __name__ == '__main__':
 	try:
-		id = sys.argv[1]
+		id = sys.argv.pop(1)
 	except IndexError:
 		print usage
 		quit()
 	for flag, value in flags:
 		if flag in sys.argv:
-			globals()[value] = sys.argv.pop(sys.argv.index(flag) + 1))
+			globals()[value] = sys.argv.pop(sys.argv.index(flag) + 1)
 			sys.argv.remove(flag)
 	for field_param in copy(sys.argv[1:]):
 		if '-' in field_param:
@@ -60,6 +67,7 @@ if __name__ == '__main__':
 			post_load_updates[field] = value
 			sys.argv.remove(field_param)
 	try:
+		session_key = server.open_deferred_accept('', {}, False)
 		files = copy(sys.argv[1:])
 		if not files:
 			files = glob.glob(id + '*fastq*')
@@ -77,23 +85,28 @@ if __name__ == '__main__':
 												  'file0':''.join(files[0:1]),
 												  'file1':''.join(files[1:2]),
 												  'assemble':True}, session_key)
-		print "{} created for {}".format(id, runid),
+		print "{} created for {}".format(runid, id),
+		sys.stdout.flush()
 		dest_path = j(genomics_path, path)
 		if not os.path.exists(dest_path) and os.path.exists(genomics_path):
-			os.makedirs(j(root, path))
-		else:
+			os.makedirs(j(genomics_path, path))
+		elif not os.path.exists(genomics_path):
 			raise Exception("Genomics path can't be found.")
 		for file in files:
-			shutil.copyfiles(file, j(dest_path, os.path.basename(file)))
 			print ", {} copied to {}".format(file, dest_path),
+			sys.stdout.flush()
+			shutil.copyfile(file, j(dest_path, os.path.basename(file)))
 		print "."
 	except:
 		print "Server rolling back on exception:"
 		server.deferred_accept_rollback(session_key)
 		raise
-	finally:
+	else:
 		try:
 			server.close_deferred_accept(session_key)
+			key = server.get(runid)['KEY']
+			for field, value in post_load_updates.items():
+				server.update_cfsan(key, field, value)
 		except:
 			server.deferred_accept_rollback(session_key)
 			raise
