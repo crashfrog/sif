@@ -52,11 +52,7 @@ else: #Windows
 	
 	
 if __name__ == '__main__':
-	try:
-		id = sys.argv.pop(1)
-	except IndexError:
-		print usage
-		quit()
+	
 	for flag, value in flags:
 		if flag in sys.argv:
 			globals()[value] = sys.argv.pop(sys.argv.index(flag) + 1)
@@ -66,6 +62,11 @@ if __name__ == '__main__':
 			field, value = field_param.split('-')[1].split('=')
 			post_load_updates[field] = value
 			sys.argv.remove(field_param)
+	try:
+		id = sys.argv.pop(1)
+	except IndexError:
+		print usage
+		quit()
 	try:
 		session_key = server.open_deferred_accept('', {}, False)
 		files = copy(sys.argv[1:])
