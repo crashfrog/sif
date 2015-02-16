@@ -76,6 +76,10 @@ if __name__ == '__main__':
 			server.deferred_accept_rollback(session_key)
 			print usage
 			quit()
+		for file in files:
+			with open(file, 'r') as file:
+				#try to pre-emptively throw IO errors
+				pass
 		run_type = run_types[type]
 		
 		runid, path = server.deferred_accept(id, {'data_type':run_type,
