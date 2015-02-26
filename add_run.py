@@ -14,7 +14,7 @@ server = xmlrpclib.ServerProxy('http://cfe1019692:8080')
 
 
 usage = """
-add_run 0.1
+add_run 0.2
 Justin Payne
 Feb 5, 2015
 
@@ -64,7 +64,7 @@ if __name__ == '__main__':
 			globals()[value] = sys.argv.pop(sys.argv.index(flag) + 1)
 			sys.argv.remove(flag)
 	for field_param in copy(sys.argv[1:]):
-		if '-' in field_param:
+		if '-' in field_param[0]:
 			field, value = field_param.split('-')[1].split('=')
 			post_load_updates[field] = value
 			sys.argv.remove(field_param)
