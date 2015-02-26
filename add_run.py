@@ -95,7 +95,8 @@ if __name__ == '__main__':
 												  'raw_file':','.join([os.path.basename(f) for f in files]),
 												  'file0':''.join(files[0:1]),
 												  'file1':''.join(files[1:2]),
-												  'assemble':True}, session_key)
+												  'assemble':True,
+												  'status':'priority'}, session_key)
 		print "{} created for {}".format(runid, id),
 		sys.stdout.flush()
 		dest_path = j(genomics_path, path)
