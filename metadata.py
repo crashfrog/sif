@@ -139,6 +139,6 @@ if __name__ == '__main__':
 		iso = server.get('CFSAN000001')
 		run = iso['Runs'][0]
 		del iso['Runs']
-		pprint.pprint(iso.keys())
-		pprint.pprint(run.keys())
+		pprint.pprint(sorted(iso.keys()))
+		pprint.pprint(sorted(run.keys()))
 		raise

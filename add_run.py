@@ -42,6 +42,12 @@ run_types = {'pacbio':'PacBio RS sequence',
 			 'nextseq':'Illumina NextSeq sequence',
 			 'hiseq':'Illumina HiSeq sequence',
 			 }
+			 
+def trimmer(run_type):
+	if 'MiSeq' in run_type:
+		return 'basic_trimmer'
+	else:
+		return 'no_trimmer'
 
 if 'Darwin' in platform.system():
 	genomics_path = "/Volumes/dna/gnome2/"
@@ -85,7 +91,7 @@ if __name__ == '__main__':
 		
 		runid, path = server.deferred_accept(id, {'data_type':run_type,
 												  'job_type':'SPAdes',
-												  'trimmer':'basic_trimmer',
+												  'trimmer':trimmer(run_type),
 												  'raw_file':','.join([os.path.basename(f) for f in files]),
 												  'file0':''.join(files[0:1]),
 												  'file1':''.join(files[1:2]),
