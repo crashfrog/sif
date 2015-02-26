@@ -60,7 +60,7 @@ else: #Windows
 if __name__ == '__main__':
 	
 	for flag, value in flags:
-		if flag in sys.argv:
+		if flag in sys.argv or ('--' + value in sys.argv):
 			globals()[value] = sys.argv.pop(sys.argv.index(flag) + 1)
 			sys.argv.remove(flag)
 	for field_param in copy(sys.argv[1:]):
