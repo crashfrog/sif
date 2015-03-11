@@ -22,6 +22,7 @@ usage = """Version 0.2
 
 """
 
+keys_succeed = False
 
 server = xmlrpclib.ServerProxy('http://cfe1019692:8080')
 
@@ -48,11 +49,15 @@ def retrieve(struct, key):
 			return key(struct)
 		except TypeError:
 			return struct[key]
+		except KeyError:
+			if keys_succeed:
+				return ''
 	else:
 		return struct.get(key, '')
 
 
 if __name__ == '__main__':
+	
 	if '-h' in sys.argv:
 		print usage
 		quit()
@@ -114,7 +119,7 @@ if __name__ == '__main__':
 							iso['Runs'] = (iso['Runs'][-1], )
 					else:
 						
-						d = defaultdict(lambda: "N/A")
+						d = defaultdict(lambda: " - ")
 						d['RunID'] = iso['FdaAccession']
 						#d.update(iso)
 						iso['Runs'] = (d, )
@@ -131,6 +136,7 @@ if __name__ == '__main__':
 						print key, iso.get(key, type(key))
 					raise
 			#print '\n',
+			keys_succeed = True
 		
 	except (KeyError, TypeError) as e:
 		import pprint

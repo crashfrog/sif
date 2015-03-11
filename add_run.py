@@ -27,9 +27,14 @@ options:
 	
 """
 
-flags = (('-t', 'type'), 
-		#('', ''), 
+params = (('-t', 'type'), 
+		#('param', 'varname'), 
 		 )
+		 
+flags = (('-x', 'nocopy'),
+		 ('-p','practice'),
+		#('flag','varname'),
+		) 
 		 
 type = 'miseq'
 		 
@@ -56,13 +61,23 @@ elif 'Linux' in platform.system():
 else: #Windows
 	genomics_path = "Z:/"
 	
+def remove_either(l, a, b):
+	try:
+		l.remove(a)
+	except ValueError:
+		l.remove(b)
 	
 if __name__ == '__main__':
 	
-	for flag, value in flags:
+	for flag, value in params:
 		if flag in sys.argv or ('--' + value in sys.argv):
 			globals()[value] = sys.argv.pop(sys.argv.index(flag) + 1)
-			sys.argv.remove(flag)
+			remove_either(sys.argv, flag, '--' + value)
+	for flag, value in flags:
+		globals()[value] = False
+		if flag in sys.argv or ('--' + value in sys.argv):
+			globals()[value] = True
+			remove_either(sys.argv, flag, '--' + value)
 	for field_param in copy(sys.argv[1:]):
 		if '-' in field_param[0]:
 			field, value = field_param.split('-')[1].split('=')
@@ -76,17 +91,18 @@ if __name__ == '__main__':
 	try:
 		session_key = server.open_deferred_accept('', {}, False)
 		files = copy(sys.argv[1:])
-		if not files:
-			files = glob.glob(id + '*fastq*')
-		if not files:
-			print "No files found to associate."
-			server.deferred_accept_rollback(session_key)
-			print usage
-			quit()
-		for file in files:
-			with open(file, 'r') as file:
-				#try to pre-emptively throw IO errors
-				pass
+		if not nocopy:
+			if not files:
+				files = glob.glob(id + '*fastq*')
+			if not files:
+				print "No files found to associate."
+				server.deferred_accept_rollback(session_key)
+				print usage
+				quit()
+			for file in files:
+				with open(file, 'r') as file:
+					#try to pre-emptively throw IO errors
+					pass
 		run_type = run_types[type]
 		
 		runid, path = server.deferred_accept(id, {'data_type':run_type,
@@ -100,7 +116,7 @@ if __name__ == '__main__':
 		print "{} created for {}".format(runid, id),
 		sys.stdout.flush()
 		dest_path = j(genomics_path, path)
-		if not os.path.exists(dest_path) and os.path.exists(genomics_path):
+		if not os.path.exists(dest_path) and os.path.exists(genomics_path) and not practice:
 			os.makedirs(j(genomics_path, path))
 		elif not os.path.exists(genomics_path):
 			raise Exception("Genomics path can't be found.")
@@ -115,6 +131,9 @@ if __name__ == '__main__':
 		raise
 	else:
 		try:
+			if practice:
+				print "Practice run, rolling back"
+				raise Exception()
 			server.close_deferred_accept(session_key)
 			key = server.get(runid)['KEY']
 			for field, value in post_load_updates.items():
