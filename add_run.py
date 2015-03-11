@@ -80,7 +80,7 @@ if __name__ == '__main__':
 			remove_either(sys.argv, flag, '--' + value)
 	for field_param in copy(sys.argv[1:]):
 		if '-' in field_param[0]:
-			field, value = field_param.split('-')[1].split('=')
+			field, value = field_param[1:].split('=')
 			post_load_updates[field] = value
 			sys.argv.remove(field_param)
 	try:
