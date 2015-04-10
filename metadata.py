@@ -69,6 +69,10 @@ if __name__ == '__main__':
 		sys.argv.remove('-x')
 		header = False
 		fields = list()
+		
+	if '-d' in sys.argv:
+		sys.argv.remove('-d')
+		header = True
 	
 	if '-f' in sys.argv:
 		sys.argv.remove('-f')
