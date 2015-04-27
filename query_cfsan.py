@@ -13,7 +13,7 @@ match the query. Useful as a
 
 Usage:
 
-	query_cfsan <field>__<relation> <query_term> [...][-limit <num_results>]
+	query_cfsan <field>__<relation> <query_term> [...][-limit <num_results>][-]
 	
 	(those are double underscores)
 	
@@ -26,6 +26,8 @@ Usage:
 		query_cfsan Project__contains GenomeTrakr Genus__isnot Salmonella
 		query_cfsan Serovar__containsnot Typhi Sequenced__is null
 		query_cfsan SequenceRunDate__greaterthaneq 2014-01-01 SequenceRunDate__lessthan 2015-01-01 #(>=, <)
+		cat a_file_of_ids | query_cfsan - Serovar__is Typhimurium #restrict to CFSAN numbers,
+			# run ids, or db keys on STDIN
 		
 Version History:
 
@@ -40,6 +42,17 @@ if __name__ == '__main__':
 	except IndexError:
 		print usage
 		quit()
+		
+	restrict = ""
+		
+	if '-' in sys.argv:
+		sys.argv.remove('-')
+		filter_list = [r.replace('\n', '') for r in sys.stdin.readlines()]
+		restrict = """ 
+AND ([KEY] IN ({0})
+	 OR RunID IN ({0})
+	 OR FdaAccession IN ({0}))
+""".format(', '.join(["'{}'".format(id) for id in filter_list]))
 		
 	terms = list()
 	limit = -1
@@ -92,8 +105,8 @@ if __name__ == '__main__':
 					field = term.split('__')[0]
 					terms.append("([{}] < '{}')".format(field, pattern))
 			
-		keys = server.query_cfsan(' AND '.join(terms) + ' ORDER BY [FdaAccession]')
-		for key in keys:
+		keys = server.query_cfsan(' AND '.join(terms) + restrict + ' ORDER BY [FdaAccession]')
+		for key in keys[0:limit]:
 			print key
 			
 			
