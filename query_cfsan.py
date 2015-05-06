@@ -106,6 +106,8 @@ AND ([KEY] IN ({0})
 					terms.append("([{}] < '{}')".format(field, pattern))
 			
 		keys = server.query_cfsan(' AND '.join(terms) + restrict + ' ORDER BY [FdaAccession]')
+		if limit == -1:
+			limit = len(keys)
 		for key in keys[0:limit]:
 			print key
 			
