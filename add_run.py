@@ -24,6 +24,8 @@ usage:
 options:
 	-t <type>		: type of run (pacbio, iontorrent, 454, *miseq*, nextseq, hiseq)
 	-<Field>=<Value>: edit created run record after processing by setting <Field> to <Value>
+	-x				: don't try to copy anything.
+	-p				: practice mode (doesn't commit)
 	
 """
 
@@ -69,21 +71,22 @@ def remove_either(l, a, b):
 	
 if __name__ == '__main__':
 	
-	for flag, value in params:
-		if flag in sys.argv or ('--' + value in sys.argv):
-			globals()[value] = sys.argv.pop(sys.argv.index(flag) + 1)
-			remove_either(sys.argv, flag, '--' + value)
-	for flag, value in flags:
-		globals()[value] = False
-		if flag in sys.argv or ('--' + value in sys.argv):
-			globals()[value] = True
-			remove_either(sys.argv, flag, '--' + value)
-	for field_param in copy(sys.argv[1:]):
-		if '-' in field_param[0]:
-			field, value = field_param[1:].split('=')
-			post_load_updates[field] = value
-			sys.argv.remove(field_param)
 	try:
+		for flag, value in params:
+			if flag in sys.argv or ('--' + value in sys.argv):
+				globals()[value] = sys.argv.pop(sys.argv.index(flag) + 1)
+				remove_either(sys.argv, flag, '--' + value)
+		for flag, value in flags:
+			globals()[value] = False
+			if flag in sys.argv or ('--' + value in sys.argv):
+				globals()[value] = True
+				remove_either(sys.argv, flag, '--' + value)
+		for field_param in copy(sys.argv[1:]):
+			if '-' in field_param[0]:
+				field, value = field_param[1:].split('=')
+				post_load_updates[field] = value
+				sys.argv.remove(field_param)
+	
 		id = sys.argv.pop(1)
 	except IndexError:
 		print usage

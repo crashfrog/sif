@@ -88,7 +88,9 @@ if __name__ == '__main__':
 		
 	for arg in sys.argv[1:]:
 		if '--' in arg:
-			name, exp = sys.argv.pop(sys.argv.index(arg)).replace('--', '').split('=')
+			tokens = sys.argv.pop(sys.argv.index(arg)).split('=')
+			name = tokens[0].replace('--', '')
+			exp = '='.join(tokens[1:])
 			callable = NameableCallable(name, lambda i, exp=exp: exp.format(**i), exp)
 			fields.append(callable)
 			
